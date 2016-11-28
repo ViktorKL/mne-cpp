@@ -46,6 +46,7 @@
 #include "FormFiles/brainampsetupprojectwidget.h"
 
 #include <direct.h>
+#include <iostream>
 
 #include <fiff/fiff.h>
 #include <scMeas/newrealtimemultisamplearray.h>
@@ -74,6 +75,7 @@ using namespace SCMEASLIB;
 using namespace IOBUFFER;
 using namespace FIFFLIB;
 using namespace Eigen;
+using namespace std;
 
 
 //*************************************************************************************************************
@@ -449,6 +451,7 @@ void BrainAMP::run()
                 //std::cout << "BrainAMP::run() - matValue.block(10,10)" << matValue.block(0,0,10,10) << std::endl;
                 m_pRMTSA_BrainAMP->data()->setValue(matValue);
             }
+
 
             m_mutex.unlock();            
         }
