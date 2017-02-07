@@ -41,7 +41,7 @@ typedef struct {		      /* Space to store a solution matrix */
 
 typedef struct {
   char       *surf_name;	/* Name of the file where surfaces were loaded from */
-  mneSurface *surfs;		/* The interface surfaces from outside towards inside */
+  INVERSELIB::MneCSurface* *surfs;   /* The interface surfaces from outside towards inside */
   int        *ntri;		/* Number of triangles on each surface */
   int        *np;		/* Number of vertices on each surface */
   int        nsurf;		/* How many */
@@ -56,7 +56,7 @@ typedef struct {
   float      *v0;		/* Space for the infinite-medium potentials */
   int        nsol;		/* Size of the solution matrix */
 
-  FIFFLIB::fiffCoordTrans head_mri_t;	/* Coordinate transformation from head to MRI coordinates */
+  INVERSELIB::FiffCoordTransOld* head_mri_t;	/* Coordinate transformation from head to MRI coordinates */
 
   float      ip_approach_limit;	/* Controls whether we need to use the isolated problem approach */
   int        use_ip_approach;	/* Do we need it */
