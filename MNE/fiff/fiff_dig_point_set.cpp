@@ -85,6 +85,7 @@ using namespace FIFFLIB;
 //=============================================================================================================
 
 FiffDigPointSet::FiffDigPointSet()
+    :m_qListDigPoint()
 {
 }
 
@@ -112,6 +113,7 @@ FiffDigPointSet::FiffDigPointSet(QIODevice &p_IODevice)   //const FiffDigPointSe
         t_pStream->close();
         qDebug() << "Could not read the FiffDigPointSet\n"; // ToDo throw error
     }
+    qDebug("%i digitizer Points read in file.", this->size());
 }
 
 
@@ -125,17 +127,17 @@ FiffDigPointSet::~FiffDigPointSet()
 
 //*************************************************************************************************************
 
-bool FiffDigPointSet::readFromStream(FiffStream::SPtr &p_Stream, FiffDigPointSet &p_Dig)
+bool FiffDigPointSet::readFromStream(FiffStream::SPtr &p_pStream, FiffDigPointSet &p_Dig)
 {
     //
     //   Open the file, create directory
     //
     bool open_here = false;
 
-    if (!p_Stream->device()->isOpen()) {
-        QString t_sFileName = p_Stream->streamName();
+    if (!p_pStream->device()->isOpen()) {
+        QString t_sFileName = p_pStream->streamName();
 
-        if(!p_Stream->open())
+        if(!p_pStream->open())
             return false;
 
         printf("Opening header data %s...\n",t_sFileName.toUtf8().constData());
@@ -154,7 +156,7 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr &p_Stream, FiffDigPointSet
     //
     //   Locate the Electrodes
     //
-    QList<FiffDirNode::SPtr> isotrak = p_Stream->tree()->dir_tree_find(FIFFB_ISOTRAK);
+    QList<FiffDirNode::SPtr> isotrak = p_pStream->dirtree()->dir_tree_find(FIFFB_ISOTRAK);
 
     fiff_int_t coord_frame = FIFFV_COORD_HEAD;
     FiffCoordTrans dig_trans;
@@ -162,26 +164,26 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr &p_Stream, FiffDigPointSet
 
     if (isotrak.size() == 1)
     {
-        for (k = 0; k < isotrak[0]->nent; ++k)
+        for (k = 0; k < isotrak[0]->nent(); ++k)
         {
             kind = isotrak[0]->dir[k]->kind;
             pos  = isotrak[0]->dir[k]->pos;
             if (kind == FIFF_DIG_POINT)
             {
-                FiffTag::read_tag(p_Stream, t_pTag, pos);
+                p_pStream->read_tag(t_pTag, pos);
                 p_Dig.m_qListDigPoint.append(t_pTag->toDigPoint());
             }
             else
             {
                 if (kind == FIFF_MNE_COORD_FRAME)
                 {
-                    FiffTag::read_tag(p_Stream, t_pTag, pos);
+                    p_pStream->read_tag(t_pTag, pos);
                     qDebug() << "NEEDS To BE DEBBUGED: FIFF_MNE_COORD_FRAME" << t_pTag->getType();
                     coord_frame = *t_pTag->toInt();
                 }
                 else if (kind == FIFF_COORD_TRANS)
                 {
-                    FiffTag::read_tag(p_Stream, t_pTag, pos);
+                    p_pStream->read_tag(t_pTag, pos);
                     qDebug() << "NEEDS To BE DEBBUGED: FIFF_COORD_TRANS" << t_pTag->getType();
                     dig_trans = t_pTag->toCoordTrans();
                 }
@@ -198,11 +200,46 @@ bool FiffDigPointSet::readFromStream(FiffStream::SPtr &p_Stream, FiffDigPointSet
     //
     if(open_here)
     {
-        p_Stream->close();
+        p_pStream->close();
     }
     return true;
 }
 
+
+//*************************************************************************************************************
+
+void FiffDigPointSet::write(QIODevice &p_IODevice)
+{
+    //
+    //   Open the file, create directory
+    //
+
+    // Create the file and save the essentials
+    FiffStream::SPtr t_pStream = FiffStream::start_file(p_IODevice);
+    printf("Write Digitizer Points in %s...\n", t_pStream->streamName().toUtf8().constData());
+    this->writeToStream(t_pStream.data());
+}
+
+
+//*************************************************************************************************************
+
+void FiffDigPointSet::writeToStream(FiffStream* p_pStream)
+{
+    p_pStream->start_block(FIFFB_MEAS);
+    p_pStream->start_block(FIFFB_MEAS_INFO);
+    p_pStream->start_block(FIFFB_ISOTRAK);
+
+    for(qint32 h = 0; h < m_qListDigPoint.size(); ++h)
+    {
+        p_pStream->write_dig_point(m_qListDigPoint[h]);
+    }
+
+    printf("\t%d digitizer points written\n", m_qListDigPoint.size());
+    p_pStream->end_block(FIFFB_ISOTRAK);
+    p_pStream->end_block(FIFFB_MEAS_INFO);
+    p_pStream->end_block(FIFFB_MEAS);
+    p_pStream->end_file();
+}
 
 //*************************************************************************************************************
 

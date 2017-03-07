@@ -54,6 +54,7 @@ CONFIG(debug, debug|release) {
             -lMNE$${MNE_LIB_VERSION}Fsd \
             -lMNE$${MNE_LIB_VERSION}Fiffd \
             -lMNE$${MNE_LIB_VERSION}Mned \
+            -lMNE$${MNE_LIB_VERSION}Fwdd \
             -lMNE$${MNE_LIB_VERSION}Inversed \
             -lMNE$${MNE_LIB_VERSION}Connectivityd \
             -lMNE$${MNE_LIB_VERSION}Dispd \
@@ -65,6 +66,7 @@ else {
             -lMNE$${MNE_LIB_VERSION}Fs \
             -lMNE$${MNE_LIB_VERSION}Fiff \
             -lMNE$${MNE_LIB_VERSION}Mne \
+            -lMNE$${MNE_LIB_VERSION}Fwd \
             -lMNE$${MNE_LIB_VERSION}Inverse \
             -lMNE$${MNE_LIB_VERSION}Connectivity \
             -lMNE$${MNE_LIB_VERSION}Disp \
@@ -122,6 +124,7 @@ SOURCES += \
     model/materials/shownormalsmaterial.cpp \
     model/materials/networkmaterial.cpp \
     control/control3dwidget.cpp \
+    adapters/ecdview.cpp \
 
 HEADERS += \
     view3D.h \
@@ -143,16 +146,18 @@ HEADERS += \
     model/items/mri/mritreeitem.h \
     model/items/common/abstracttreeitem.h \
     model/items/common/metatreeitem.h \
+    model/items/common/types.h \
     model/workers/rtSourceLoc/rtsourcelocdataworker.h \
     model/3dhelpers/renderable3Dentity.h \
     model/3dhelpers/custommesh.h \
-    model/common/types.h \
+    model/items/common/types.h \
     model/materials/pervertexphongalphamaterial.h \
     model/materials/pervertextessphongalphamaterial.h \
     model/materials/shadermaterial.h \
     model/materials/shownormalsmaterial.h \
     model/materials/networkmaterial.h \
     control/control3dwidget.h \
+    adapters/ecdview.h \
     disp3D_global.h \
 
 FORMS += \

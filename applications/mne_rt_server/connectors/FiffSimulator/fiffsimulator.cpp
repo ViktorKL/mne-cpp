@@ -85,7 +85,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace FiffSimulatorPlugin;
+using namespace FIFFSIMULATORPLUGIN;
 using namespace FIFFLIB;
 using namespace MNELIB;
 
@@ -108,8 +108,35 @@ const QString FiffSimulator::Commands::SIMFILE      = "simfile";
 
 FiffSimulator::FiffSimulator()
 : m_pFiffProducer(new FiffProducer(this))
+using namespace FIFFLIB;
+using namespace MNELIB;
+
+//*************************************************************************************************************
+//=============================================================================================================
+// DEFINE MEMBER CONSTANTS
+//=============================================================================================================
+
+const QString FiffSimulator::Commands::BUFSIZE      = "bufsize";
+const QString FiffSimulator::Commands::GETBUFSIZE   = "getbufsize";
+const QString FiffSimulator::Commands::ACCEL        = "accel";
+const QString FiffSimulator::Commands::GETACCEL     = "getaccel";
+const QString FiffSimulator::Commands::SIMFILE      = "simfile";
+
+
+//*************************************************************************************************************
+//=============================================================================================================
+// DEFINE MEMBER METHODS
+//=============================================================================================================
+
+FiffSimulator::FiffSimulator()
+: m_pFiffProducer(new FiffProducer(this))
+<<<<<<< .mine
 , m_sResourceDataPath(QString("%1/MNE-sample-data/MEG/sample/sample_audvis_raw.fif").arg(QCoreApplication::applicationDirPath()))
 //, m_sResourceDataPath(QString("D:/Clouds/Synology/Studium/Master/Masterarbeit/measurements/SSVEP_test_1/Lorenz/2016_05_19_visual_test4_raw.fif").arg(QCoreApplication::applicationDirPath()))
+=======
+, m_sResourceDataPath(QString("%1/MNE-sample-data/MEG/sample/sample_audvis_raw.fif").arg(QCoreApplication::applicationDirPath()))
+
+>>>>>>> .theirs
 , m_uiBufferSampleSize(100)//(4)
 , m_AccelerationFactor(1.0)
 , m_TrueSamplingRate(0.0)

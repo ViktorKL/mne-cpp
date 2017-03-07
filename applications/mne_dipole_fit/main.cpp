@@ -44,10 +44,7 @@
 
 #include <mne/mne_bem.h>
 
-#include <disp3D/view3D.h>
-#include <disp3D/control/control3dwidget.h>
-#include <disp3D/model/items/sourceactivity/ecddatatreeitem.h>
-#include <disp3D/model/data3Dtreemodel.h>
+#include <disp3D/adapters/ecdview.h>
 
 #include <fs/label.h>
 #include <fs/surfaceset.h>
@@ -97,6 +94,12 @@ int main(int argc, char *argv[])
     DipoleFit dipFit(&settings);
     ECDSet set = dipFit.calculateFit();
 
+    ECDView::SPtr pEcdViewer;
+    if(settings.gui) {
+        pEcdViewer = ECDView::SPtr(new ECDView(settings, set));
+        pEcdViewer->show();
+    }
+
     /*
     * Saving...
     */
@@ -109,72 +112,6 @@ int main(int argc, char *argv[])
     * Test - Reading again
     */
     ECDSet::read_dipoles_dip(settings.dipname);
-
-
-//    //=========================================================================================================
-//    // Visualization Part
-//    //=========================================================================================================
-//    /*
-//    * Perform Head->MRI coord. transformation
-//    */
-//    QFile file("./MNE-sample-data/MEG/sample/sample_audvis_raw-trans.fif");
-//    FiffCoordTrans coordTrans(file);
-
-//    std::cout << std::endl << "coordTrans" << coordTrans.trans;
-//    std::cout << std::endl << "coordTransInv" << coordTrans.invtrans;
-
-//    for(int i = 0; i < set.size() ; ++i) {
-//        MatrixX3f dipoles(1, 3);
-//        //transform location
-//        dipoles(0,0) = set[i].rd(0);
-//        dipoles(0,1) = set[i].rd(1);
-//        dipoles(0,2) = set[i].rd(2);
-
-//        dipoles = coordTrans.apply_trans(dipoles);
-
-//        set[i].rd(0) = dipoles(0,0);
-//        set[i].rd(1) = dipoles(0,1);
-//        set[i].rd(2) = dipoles(0,2);
-
-//        //transform orientation
-//        dipoles(0,0) = set[i].Q(0);
-//        dipoles(0,1) = set[i].Q(1);
-//        dipoles(0,2) = set[i].Q(2);
-
-//        dipoles = coordTrans.apply_trans(dipoles);
-
-//        set[i].Q(0) = dipoles(0,0);
-//        set[i].Q(1) = dipoles(0,1);
-//        set[i].Q(2) = dipoles(0,2);
-//    }
-
-//    /*
-//    * Visualize the dipoles
-//    */
-//    //Load FS set
-//    SurfaceSet tSurfSet ("sample", 2, "orig", "./MNE-sample-data/subjects");
-//    AnnotationSet tAnnotSet ("sample", 2, "orig", "./MNE-sample-data/subjects");
-
-//    //Read and show BEM
-//    QFile t_fileBem("./MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif");
-//    MNEBem t_Bem(t_fileBem);
-
-//    //Create 3D data model and add data to model
-//    Data3DTreeModel::SPtr p3DDataModel = Data3DTreeModel::SPtr(new Data3DTreeModel());
-
-//    ECDSet::SPtr pSet = ECDSet::SPtr(new ECDSet(set));
-//    p3DDataModel->addBemData("sample", "BEM", t_Bem);
-//    p3DDataModel->addSurfaceSet("sample", "Brain", tSurfSet, tAnnotSet);
-//    p3DDataModel->addDipoleFitData("sample", "Dipole test", pSet);
-
-//    //Create the 3D view
-//    View3D::SPtr testWindow = View3D::SPtr(new View3D());
-//    testWindow->setModel(p3DDataModel);
-//    testWindow->show();
-
-//    Control3DWidget::SPtr control3DWidget = Control3DWidget::SPtr(new Control3DWidget());
-//    control3DWidget->init(p3DDataModel, testWindow);
-//    control3DWidget->show();
 
     return app.exec();
 }

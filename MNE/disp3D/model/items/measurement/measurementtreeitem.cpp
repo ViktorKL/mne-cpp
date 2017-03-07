@@ -205,7 +205,9 @@ MneEstimateTreeItem* MeasurementTreeItem::addData(const MNESourceEstimate& tSour
 
                     //Find MRI data set and hemisphere from parent item
                     //Option 1 - Choose first found MRI set
-                    pMriItem = dynamic_cast<MriTreeItem*>(lMRIChildren.first());
+                    if(!lMRIChildren.isEmpty()) {
+                        pMriItem = dynamic_cast<MriTreeItem*>(lMRIChildren.first());
+                    }
 
 //                    //Option 2 - Choose MRI set by its name
 //                    QString sMRISetName = "MRI";
@@ -274,7 +276,7 @@ EcdDataTreeItem* MeasurementTreeItem::addData(INVERSELIB::ECDSet::SPtr &pECDSet,
     if(pECDSet->size() > 0) {
         //Add source estimation data as child
         if(this->findChildren(Data3DTreeModelItemTypes::ECDSetDataItem).size() == 0) {
-            //If rt data item does not exists yet, create it here!
+            //If ecd data item does not exists yet, create it here!
             m_EcdDataTreeItem = new EcdDataTreeItem();
 
             QList<QStandardItem*> list;

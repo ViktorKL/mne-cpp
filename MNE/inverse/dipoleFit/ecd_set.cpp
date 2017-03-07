@@ -43,7 +43,7 @@
 #include <fiff/fiff_types.h>
 
 
-//ToDo don't use access and unlink -> use QT stuff instead
+//ToDo don't use access and unlink -> use QT stuff instead -> QFile
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #include <io.h>
 #else
@@ -155,8 +155,8 @@ ECDSet::ECDSet()
 //*************************************************************************************************************
 
 ECDSet::ECDSet(const ECDSet &p_ECDSet)
-    : dataname(p_ECDSet.dataname)
-    , m_qListDips(p_ECDSet.m_qListDips)
+: dataname(p_ECDSet.dataname)
+, m_qListDips(p_ECDSet.m_qListDips)
 {
 
 }
