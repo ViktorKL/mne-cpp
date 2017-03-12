@@ -1689,6 +1689,9 @@ bool MNEForwardSolution::read(QIODevice& p_IODevice, MNEForwardSolution& fwd, bo
 
 bool MNEForwardSolution::read_one(FiffStream::SPtr& p_pStream, const FiffDirNode::SPtr& p_Node, MNEForwardSolution& one)
 {
+    if(!p_Node) {
+        return false;
+    }
     //
     //   Read all interesting stuff for one forward solution
     //
