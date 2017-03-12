@@ -37,21 +37,29 @@ include(../mne-cpp.pri)
 
 TEMPLATE = subdirs
 
+# TBD change the dependency order - forward before inverse
 SUBDIRS += \
     generics \
     utils \
     fs \
     fiff \
     mne \
+    fwd \
     inverse \
     connectivity \
     rtCommand \
     rtClient \
     rtProcessing \
 
+
 !contains(MNECPP_CONFIG, minimalVersion) {
     SUBDIRS += \
         disp \
+
+    !isEmpty( CNTK_INCLUDE_DIR ) {
+        SUBDIRS += \
+            deep \
+    }
 
     qtHaveModule(charts) {
         SUBDIRS += \

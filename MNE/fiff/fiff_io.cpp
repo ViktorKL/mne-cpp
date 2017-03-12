@@ -99,7 +99,7 @@ bool FiffIO::setup_read(QIODevice& p_IODevice, FiffInfo& info, FiffDirNode::SPtr
         return false;
 
     //Read the measurement info
-    if(!p_pStream->read_meas_info(p_pStream->tree(), info, dirTree))
+    if(!p_pStream->read_meas_info(p_pStream->dirtree(), info, dirTree))
         return false;
 
     return true;
@@ -224,7 +224,7 @@ bool FiffIO::write_raw(QIODevice &p_IODevice, const fiff_int_t idx) const {
     SparseMatrix<double> mult;
     RowVectorXi sel;
 
-//    std::cout << "Writing file " << QFile(&p_IODevice).fileName().toLatin1() << std::endl;
+//    std::cout << "Writing file " << QFile(&p_IODevice).fileName().toUtf8() << std::endl;
     FiffStream::SPtr outfid = Fiff::start_writing_raw(p_IODevice,this->m_qlistRaw[idx]->info,cals);
 
     //Setup reading parameters
