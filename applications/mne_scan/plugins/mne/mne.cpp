@@ -503,8 +503,8 @@ void MNE::run()
         msleep(10);// Wait for fiff Info
     }
 
-    //qDebug() << "m_pClusteredFwd->info.ch_names" << m_pClusteredFwd->info.ch_names;
-    //qDebug() << "m_pFiffInfo->ch_names" << m_pFiffInfo->ch_names;
+    qDebug() << "m_pClusteredFwd->info.ch_names" << m_pClusteredFwd->info.ch_names;
+    qDebug() << "m_pFiffInfo->ch_names" << m_pFiffInfo->ch_names;
 
     //
     // Init Real-Time inverse estimator
