@@ -73,7 +73,7 @@ MNE::MNE()
 , m_bReceiveData(false)
 , m_bProcessData(false)
 , m_bFinishedClustering(false)
-, m_qFileFwdSolution("./MNE-sample-data/MEG/sample/sample_audvis-meg-eeg-oct-6-fwd.fif")
+, m_qFileFwdSolution("./MNE-sample-data/MEG/sample/sample_audvis-eeg-oct-6-fwd.fif")
 , m_sAtlasDir("./MNE-sample-data/subjects/sample/label")
 , m_sSurfaceDir("./MNE-sample-data/subjects/sample/surf")
 //, m_qFileFwdSolution("D:/SoersStation/Dokumente/Karriere/TU Ilmenau/Promotion/Projekte/2016_LNT/Messdaten/MEG/lorenz/2016_04_21/2016_04_21_visual_raw-oct-6-fwd.fif")
@@ -160,6 +160,11 @@ void MNE::unload()
 void MNE::calcFiffInfo()
 {
     QMutexLocker locker(&m_qMutex);
+
+    //qDebug() << "m_qListCovChNames" << m_qListCovChNames;
+    //qDebug() << "m_pFiffInfoForward->ch_names" << m_pFiffInfoForward->ch_names;
+    //qDebug() << "m_pFiffInfoInput->ch_names" << m_pFiffInfoInput->ch_names;
+
 
     if(m_qListCovChNames.size() > 0 && m_pFiffInfoInput && m_pFiffInfoForward)
     {
@@ -362,6 +367,8 @@ QWidget* MNE::setupWidget()
 
 void MNE::updateRTMSA(SCMEASLIB::NewMeasurement::SPtr pMeasurement)
 {
+    qDebug() << "updateRTMSA()";
+
     QSharedPointer<NewRealTimeMultiSampleArray> pRTMSA = pMeasurement.dynamicCast<NewRealTimeMultiSampleArray>();
 
     if(pRTMSA && m_bReceiveData) {
@@ -416,6 +423,8 @@ void MNE::updateRTC(SCMEASLIB::NewMeasurement::SPtr pMeasurement)
 
 void MNE::updateRTE(SCMEASLIB::NewMeasurement::SPtr pMeasurement)
 {
+    qDebug() << "updateRTE()";
+
     QSharedPointer<RealTimeEvokedSet> pRTES = pMeasurement.dynamicCast<RealTimeEvokedSet>();
 
     QMutexLocker locker(&m_qMutex);
