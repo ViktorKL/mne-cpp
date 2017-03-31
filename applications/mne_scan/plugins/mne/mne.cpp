@@ -161,11 +161,6 @@ void MNE::calcFiffInfo()
 {
     QMutexLocker locker(&m_qMutex);
 
-    //qDebug() << "m_qListCovChNames" << m_qListCovChNames;
-    //qDebug() << "m_pFiffInfoForward->ch_names" << m_pFiffInfoForward->ch_names;
-    //qDebug() << "m_pFiffInfoInput->ch_names" << m_pFiffInfoInput->ch_names;
-
-
     if(m_qListCovChNames.size() > 0 && m_pFiffInfoInput && m_pFiffInfoForward)
     {
         qDebug() << "Fiff Infos available";
@@ -242,7 +237,7 @@ void MNE::calcFiffInfo()
             if(m_qListCovChNames.contains(ch))
                 m_qListPickChannels << ch;
         }
-        RowVectorXi sel = m_pFiffInfoInput->pick_channels(m_qListPickChannels);
+        RowVectorXi sel = m_pFiffInfoInput->pick_channels(m_pFiffInfoInput->ch_names, m_qListPickChannels);
 
         qDebug() << "m_qListPickChannels" << m_qListPickChannels;
 
