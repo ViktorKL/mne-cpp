@@ -141,6 +141,7 @@ protected:
 
 private:
     bool                                            m_bIsRunning;           /**< Flag whether thread is running.*/
+    bool                                            m_bProcessData;         /**< Flag for processing data.*/
 
     FIFFLIB::FiffInfo::SPtr                         m_pFiffInfo;            /**< Fiff measurement info.*/
 

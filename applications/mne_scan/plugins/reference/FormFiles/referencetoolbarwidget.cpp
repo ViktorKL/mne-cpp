@@ -55,9 +55,9 @@ using namespace REFERENCEPLUGIN;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-ReferenceToolbarWidget::ReferenceToolbarWidget(REFERENCEPLUGIN::Reference *pRef, QWidget *parent)
-: ui(new Ui::ReferenceToolbarWidget)
-, m_pRef(pRef)
+ReferenceToolbarWidget::ReferenceToolbarWidget(Reference *pRef, QWidget *parent)
+: m_pRef(pRef)
+, ui(new Ui::ReferenceToolbarWidget)
 {
     ui->setupUi(this);
 }
@@ -78,7 +78,7 @@ void ReferenceToolbarWidget::updateChannels(FIFFLIB::FiffInfo::SPtr &pFiffInfo)
     ui->m_listWidget_ChannelList->clear();
 
     for(int i = 0; i < pFiffInfo->chs.size(); i++){
-        if(pFiffInfo->chs.at(i).ch_name.contains("EEG")){
+        if(pFiffInfo->chs.at(i).ch_name.contains("EEG") && !pFiffInfo->bads.contains(pFiffInfo->chs.at(i).ch_name)){
             ui->m_listWidget_ChannelList->addItem(pFiffInfo->chs.at(i).ch_name);
         }
     }

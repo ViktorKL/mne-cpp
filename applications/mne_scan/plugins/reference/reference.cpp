@@ -61,6 +61,7 @@ using namespace IOBUFFER;
 
 Reference::Reference()
 : m_bIsRunning(false)
+, m_bProcessData(false)
 , m_pRefInput(Q_NULLPTR)
 , m_pRefOutput(Q_NULLPTR)
 , m_pRefBuffer(Q_NULLPTR)
@@ -72,6 +73,9 @@ Reference::Reference()
     connect(m_pActionRefToolbarWidget, &QAction::triggered,
             this, &Reference::showRefToolbarWidget);
     addPluginAction(m_pActionRefToolbarWidget);
+
+    //initializing the toolbarwidget, so the chanel list can be built
+    m_pRefToolbarWidget = QSharedPointer<ReferenceToolbarWidget>( new ReferenceToolbarWidget(this));
 }
 
 
@@ -144,12 +148,19 @@ bool Reference::stop()
 {
     m_bIsRunning = false;
 
-    m_pRefBuffer->releaseFromPop();
-    m_pRefBuffer->releaseFromPush();
+    // Only clear if buffers have been initialised
+    if(m_bProcessData)
+    {
+        m_pRefBuffer->releaseFromPop();
+        m_pRefBuffer->releaseFromPush();
 
-    m_pRefBuffer->clear();
+        m_pRefBuffer->clear();
+    }
 
-    return true;
+    // Stop filling buffers with data from the inputs
+    m_bProcessData = false;
+
+   return true;
 }
 
 
@@ -202,12 +213,18 @@ void Reference::update(SCMEASLIB::NewMeasurement::SPtr pMeasurement)
             m_pRefToolbarWidget->updateChannels(m_pFiffInfo);
         }
 
-        MatrixXd t_mat;
 
-        for(unsigned char i = 0; i < pRTMSA->getMultiArraySize(); ++i) {
-            t_mat = pRTMSA->getMultiSampleArray()[i];
-            m_pRefBuffer->push(&t_mat);
+        // filling the matrix buffer
+        if(m_bProcessData)
+        {
+            MatrixXd t_mat;
+            for(qint32 i = 0; i < pRTMSA->getMultiArraySize(); ++i){
+                qDebug() << "before pull";
+                t_mat = pRTMSA->getMultiSampleArray()[i];
+                m_pRefBuffer->push(&t_mat);
+            }
         }
+
     }
 }
 
@@ -219,6 +236,7 @@ void Reference::run()
     //
     // Wait for Fiff Info
     //
+    m_bProcessData = true;
     while(!m_pFiffInfo)
         msleep(10);// Wait for fiff Info
 
@@ -232,6 +250,7 @@ void Reference::run()
 
         //Send the data to the connected plugins and the online display
         m_pRefOutput->data()->setValue(matCAR);
+
     }
 }
 
