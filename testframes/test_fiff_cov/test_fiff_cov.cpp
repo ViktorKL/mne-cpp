@@ -1,17 +1,14 @@
 //=============================================================================================================
 /**
-* @file     rthpis.cpp
-* @author   Chiran Doshi <chiran.doshi@childrens.harvard.edu>;
-*           Lorenz Esch <Lorenz.Esch@ntu-ilmenau.de>;
-*           Limin Sun <liminsun@nmr.mgh.harvard.edu>;
+* @file     main.cpp
+* @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
 *           Matti Hamalainen <msh@nmr.mgh.harvard.edu>
-*
 * @version  1.0
-* @date     November, 2016
+* @date     April, 2017
 *
 * @section  LICENSE
 *
-* Copyright (C) 2016, Chiran Doshi, Lorenz Esch, Limin Sun, and Matti Hamalainen. All rights reserved.
+* Copyright (C) 2017, Lorenz Esch and Matti Hamalainen. All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without modification, are permitted provided that
 * the following conditions are met:
@@ -32,7 +29,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 *
 *
-* @brief     implementation of the RtHPIS Class.
+* @brief    Example of the computation of a test_read_cov
 *
 */
 
@@ -42,16 +39,10 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "rthpis.h"
+#include <fiff/fiff_cov.h>
 
-#include <inverse/hpiFit/hpifit.h>
-#include <fiff/fiff_info.h>
-
-
-//*************************************************************************************************************
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
+#include <iostream>
+#include <utils/ioutils.h>
 
 
 //*************************************************************************************************************
@@ -59,7 +50,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QElapsedTimer>
+#include <QtTest>
 
 
 //*************************************************************************************************************
@@ -67,108 +58,132 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace RTPROCESSINGLIB;
 using namespace FIFFLIB;
-using namespace Eigen;
-using namespace IOBUFFER;
-using namespace INVERSELIB;
+using namespace UTILSLIB;
+
+
+//=============================================================================================================
+/**
+* DECLARE CLASS TestFiffCov
+*
+* @brief The TestFiffCov class provides covariance reading verification tests
+*
+*/
+class TestFiffCov: public QObject
+{
+    Q_OBJECT
+
+public:
+    TestFiffCov();
+
+private slots:
+    void initTestCase();
+    void compareData();
+    void compareKind();
+    void compareDiag();
+    void compareDim();
+    void compareNfree();
+    void cleanupTestCase();
+
+private:
+    double epsilon;
+
+    FiffCov covLoaded;
+    FiffCov covResult;
+};
+
+
+//*************************************************************************************************************
+
+TestFiffCov::TestFiffCov()
+: epsilon(0.000001)
+{
+}
+
+
+
+//*************************************************************************************************************
+
+void TestFiffCov::initTestCase()
+{
+    qDebug() << "Epsilon" << epsilon;
+
+    //Read the results produced with MNE-CPP
+    QFile t_fileIn(QDir::currentPath()+"/mne-cpp-test-data/MEG/sample/sample_audvis-cov.fif");
+    covLoaded = FiffCov(t_fileIn);
+
+    //Read the result data produced with mne_matlab
+    MatrixXd data;
+    IOUtils::read_eigen_matrix(data, QDir::currentPath()+"/mne-cpp-test-data/Result/ref_data_sample_audvis-cov.dat");
+    covResult.data = data;
+
+    covResult.kind = 1;
+    covResult.diag = 0;
+    covResult.dim = 366;
+    covResult.nfree = 15972;
+
+}
+
+
+//*************************************************************************************************************
+
+void TestFiffCov::compareData()
+{
+    //Make the values a little bit bigger
+    MatrixXd data_diff = covResult.data*1000000 - covLoaded.data*1000000;
+
+//    qDebug()<<"abs(covResult.data.sum()) "<<covResult.data.normalized().sum();
+//    qDebug()<<"abs(covLoaded.data.sum()) "<<covLoaded.data.normalized().sum();
+//    qDebug()<<"abs(data_diff.sum()) "<<abs(data_diff.sum());
+//    qDebug()<<"epsilon "<<epsilon;
+
+    QVERIFY( abs(data_diff.sum()) < epsilon );
+}
+
+
+//*************************************************************************************************************
+
+void TestFiffCov::compareKind()
+{
+    QVERIFY( covResult.kind == covLoaded.kind );
+}
+
+
+//*************************************************************************************************************
+
+void TestFiffCov::compareDiag()
+{
+    QVERIFY( covResult.diag == covLoaded.diag );
+}
+
+
+//*************************************************************************************************************
+
+void TestFiffCov::compareDim()
+{
+    QVERIFY( covResult.dim == covLoaded.dim );
+}
+
+
+//*************************************************************************************************************
+
+void TestFiffCov::compareNfree()
+{
+    QVERIFY( covResult.nfree == covLoaded.nfree );
+}
+
+
+//*************************************************************************************************************
+
+void TestFiffCov::cleanupTestCase()
+{
+}
 
 
 //*************************************************************************************************************
 //=============================================================================================================
-// DEFINE MEMBER METHODS RtHPISWorker
+// MAIN
 //=============================================================================================================
 
-void RtHPISWorker::doWork(const Eigen::MatrixXd& matData,
-            const Eigen::MatrixXd& m_matProjectors,
-            const QVector<int>& vFreqs,
-            QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo) {
-
-    //Perform actual fitting
-    FittingResult fitResult;
-    fitResult.devHeadTrans.from = 1;
-    fitResult.devHeadTrans.to = 4;
-
-    HPIFit::fitHPI(matData,
-                    m_matProjectors,
-                    fitResult.devHeadTrans,
-                    vFreqs,
-                    fitResult.errorDistances,
-                    fitResult.fittedCoils,
-                    pFiffInfo);
-
-    emit resultReady(fitResult);
-}
-
-
-//*************************************************************************************************************
-//=============================================================================================================
-// DEFINE MEMBER METHODS RtHPIS
-//=============================================================================================================
-
-RtHPIS::RtHPIS(FiffInfo::SPtr p_pFiffInfo, QObject *parent)
-: QObject(parent)
-, m_pFiffInfo(p_pFiffInfo)
-{
-    qRegisterMetaType<RTPROCESSINGLIB::FittingResult>("RTPROCESSINGLIB::FittingResult");
-    qRegisterMetaType<QVector<int> >("QVector<int>");
-    qRegisterMetaType<QSharedPointer<FIFFLIB::FiffInfo> >("QSharedPointer<FIFFLIB::FiffInfo>");
-
-    RtHPISWorker *worker = new RtHPISWorker;
-    worker->moveToThread(&m_workerThread);
-
-    connect(&m_workerThread, &QThread::finished,
-            worker, &QObject::deleteLater);
-
-    connect(this, &RtHPIS::operate,
-            worker, &RtHPISWorker::doWork);
-
-    connect(worker, &RtHPISWorker::resultReady,
-            this, &RtHPIS::handleResults);
-
-    m_workerThread.start();
-}
-
-
-//*************************************************************************************************************
-
-RtHPIS::~RtHPIS()
-{
-    m_workerThread.quit();
-    m_workerThread.wait();
-}
-
-
-//*************************************************************************************************************
-
-void RtHPIS::append(const MatrixXd &data)
-{
-    emit operate(data,
-                 m_matProjectors,
-                 m_vCoilFreqs,
-                 m_pFiffInfo);
-}
-
-
-//*************************************************************************************************************
-
-void RtHPIS::setCoilFrequencies(const QVector<int>& vCoilFreqs)
-{
-    m_vCoilFreqs = vCoilFreqs;
-}
-
-
-//*************************************************************************************************************
-
-void RtHPIS::setProjectionMatrix(const Eigen::MatrixXd& matProjectors)
-{
-    m_matProjectors = matProjectors;
-}
-
-
-//*************************************************************************************************************
-
-void RtHPIS::handleResults(const RTPROCESSINGLIB::FittingResult& fitResult)
-{
-    emit newFittingResultAvailable(fitResult);
-}
+QTEST_APPLESS_MAIN(TestFiffCov)
+#include "test_fiff_cov.moc"
