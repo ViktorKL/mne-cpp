@@ -58,7 +58,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace MNEPlugin;
+using namespace MNEPLUGIN;
 using namespace FIFFLIB;
 using namespace SCMEASLIB;
 
@@ -73,7 +73,7 @@ MNE::MNE()
 , m_bReceiveData(false)
 , m_bProcessData(false)
 , m_bFinishedClustering(false)
-, m_qFileFwdSolution("./MNE-sample-data/MEG/sample/sample_audvis-eeg-oct-6-fwd.fif")
+, m_qFileFwdSolution("./MNE-sample-data/MEG/sample/sample_audvis-meg-eeg-oct-6-fwd.fif")
 , m_sAtlasDir("./MNE-sample-data/subjects/sample/label")
 , m_sSurfaceDir("./MNE-sample-data/subjects/sample/surf")
 , m_iNumAverages(1)
