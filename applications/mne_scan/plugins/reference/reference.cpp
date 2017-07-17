@@ -219,7 +219,6 @@ void Reference::update(SCMEASLIB::NewMeasurement::SPtr pMeasurement)
         {
             MatrixXd t_mat;
             for(qint32 i = 0; i < pRTMSA->getMultiArraySize(); ++i){
-                qDebug() << "before pull";
                 t_mat = pRTMSA->getMultiSampleArray()[i];
                 m_pRefBuffer->push(&t_mat);
             }
@@ -250,7 +249,6 @@ void Reference::run()
 
         //Send the data to the connected plugins and the online display
         m_pRefOutput->data()->setValue(matCAR);
-
     }
 }
 
