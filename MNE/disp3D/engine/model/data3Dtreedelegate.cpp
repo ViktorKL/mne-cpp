@@ -45,6 +45,9 @@
 
 #include <disp/imagesc.h>
 
+#include <utils/mnemath.h>
+#include <dispCharts/spline.h>
+
 
 //*************************************************************************************************************
 //=============================================================================================================
@@ -133,6 +136,7 @@ QWidget *Data3DTreeDelegate::createEditor(QWidget* parent, const QStyleOptionVie
 
                 //Get data
                 MatrixXd matRTData = index.model()->data(indexParent, Data3DTreeModelItemRoles::RTData).value<MatrixXd>();
+                matRTData = matRTData.cwiseAbs();
 
                 //Calcualte histogram
                 Eigen::VectorXd resultClassLimit;
@@ -162,7 +166,7 @@ QWidget *Data3DTreeDelegate::createEditor(QWidget* parent, const QStyleOptionVie
             pSpinBox->setSuffix(" mSec");
             pSpinBox->setMinimum(17);
             pSpinBox->setMaximum(50000);
-            pSpinBox->setSingleStep(10);
+            pSpinBox->setSingleStep(1);
             pSpinBox->setValue(index.model()->data(index, MetaTreeItemRoles::StreamingTimeInterval).toInt());
             return pSpinBox;
         }
@@ -332,6 +336,29 @@ QWidget *Data3DTreeDelegate::createEditor(QWidget* parent, const QStyleOptionVie
             pComboBox->addItem("Phong Alpha");
             return pComboBox;
         }
+        
+        case MetaTreeItemTypes::CancelDistance: {
+            QDoubleSpinBox* pDoubleSpinBox = new QDoubleSpinBox(parent);
+            connect(pDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+                    this, &Data3DTreeDelegate::onEditorEdited);
+            pDoubleSpinBox->setMinimum(0.001);
+            pDoubleSpinBox->setMaximum(1.0);
+            pDoubleSpinBox->setSingleStep(0.01);
+            pDoubleSpinBox->setSuffix("m");
+            pDoubleSpinBox->setValue(index.model()->data(index, MetaTreeItemRoles::CancelDistance).toDouble());
+            return pDoubleSpinBox;
+        }
+
+        case MetaTreeItemTypes::InterpolationFunction: {
+            QComboBox* pComboBox = new QComboBox(parent);
+            connect(pComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+                    this, &Data3DTreeDelegate::onEditorEdited);
+            pComboBox->addItem("Linear");
+            pComboBox->addItem("Square");
+            pComboBox->addItem("Cubic");
+            pComboBox->addItem("Gaussian");
+            return pComboBox;
+        }
 
         default: // do nothing;
             break;
@@ -379,6 +406,7 @@ void Data3DTreeDelegate::setEditorData(QWidget* editor, const QModelIndex& index
 
                     //Get data
                     MatrixXd matRTData = index.model()->data(indexParent, Data3DTreeModelItemRoles::RTData).value<MatrixXd>();
+                    matRTData = matRTData.cwiseAbs();
 
                     //Calcualte histogram
                     Eigen::VectorXd resultClassLimit;
@@ -536,6 +564,12 @@ void Data3DTreeDelegate::setEditorData(QWidget* editor, const QModelIndex& index
             QComboBox* pComboBox = static_cast<QComboBox*>(editor);
             pComboBox->setCurrentText(materialType);
             return;
+        }
+        case MetaTreeItemTypes::CancelDistance: {
+            int value = index.model()->data(index, MetaTreeItemRoles::CancelDistance).toDouble();
+            QSpinBox* pSpinBox = static_cast<QSpinBox*>(editor);
+            pSpinBox->setValue(value);
+            break;
         }
 
         default: // do nothing;
@@ -752,6 +786,27 @@ void Data3DTreeDelegate::setModelData(QWidget* editor, QAbstractItemModel* model
             model->setData(index, data, Qt::DisplayRole);
             return;
         }
+        
+        case MetaTreeItemTypes::CancelDistance: {
+            QDoubleSpinBox* pDoubleSpinBox = static_cast<QDoubleSpinBox*>(editor);
+            QVariant data;
+            data.setValue(pDoubleSpinBox->value());
+    
+            model->setData(index, data, MetaTreeItemRoles::CancelDistance);
+            model->setData(index, data, Qt::DisplayRole);
+            break;
+        }
+
+        case MetaTreeItemTypes::InterpolationFunction: {
+            QComboBox* pColorMapType = static_cast<QComboBox*>(editor);
+            QVariant data;
+            data.setValue(pColorMapType->currentText());
+
+            model->setData(index, data, MetaTreeItemRoles::InterpolationFunction);
+            model->setData(index, data, Qt::DisplayRole);
+            return;
+        }
+        
 
         default: // do nothing;
             break;

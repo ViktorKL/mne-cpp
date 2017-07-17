@@ -90,13 +90,13 @@ void BemSurfaceTreeItem::initItem()
     this->setCheckState(Qt::Checked);
     this->setToolTip("BEM surface item");
 
-    //Set shaders
-    this->removeComponent(m_pMaterial);
-    this->removeComponent(m_pTessMaterial);
-    this->removeComponent(m_pNormalMaterial);
+//    //Set shaders
+//    this->removeComponent(m_pMaterial);
+//    this->removeComponent(m_pTessMaterial);
+//    this->removeComponent(m_pNormalMaterial);
 
-    PerVertexPhongAlphaMaterial* pBemMaterial = new PerVertexPhongAlphaMaterial(true);
-    this->addComponent(pBemMaterial);
+//    PerVertexPhongAlphaMaterial* pBemMaterial = new PerVertexPhongAlphaMaterial(true);
+//    this->addComponent(pBemMaterial);
 }
 
 
@@ -123,4 +123,3 @@ void BemSurfaceTreeItem::addData(const MNEBemSurface& tBemSurface)
     data.setValue(tBemSurface.rr);
     this->setData(data, Data3DTreeModelItemRoles::SurfaceVert);
 }
-

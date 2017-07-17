@@ -47,9 +47,8 @@
 #include "items/measurement/measurementtreeitem.h"
 #include "items/mri/mritreeitem.h"
 #include "items/digitizer/digitizertreeitem.h"
+#include "items/sensordata/sensordatatreeitem.h"
 #include "3dhelpers/renderable3Dentity.h"
-
-#include <mne/mne_bem.h>
 
 #include <inverse/dipoleFit/ecd_set.h>
 
@@ -360,8 +359,8 @@ BemTreeItem* Data3DTreeModel::addBemData(const QString& sSubject, const QString&
 
 SensorSetTreeItem* Data3DTreeModel::addMegSensorInfo(const QString& sSubject,
                                                        const QString& sSensorSetName,
-                                                       const MNELIB::MNEBem& sensor,
-                                                       const QList<FIFFLIB::FiffChInfo>& lChInfo)
+                                                        const QList<FIFFLIB::FiffChInfo>& lChInfo,
+                                                       const MNELIB::MNEBem& sensor)
 {
     SensorSetTreeItem* pReturnItem = Q_NULLPTR;
 
@@ -373,11 +372,40 @@ SensorSetTreeItem* Data3DTreeModel::addMegSensorInfo(const QString& sSubject,
 
     if(!itemList.isEmpty() && (itemList.first()->type() == Data3DTreeModelItemTypes::SensorSetItem)) {
         pReturnItem = dynamic_cast<SensorSetTreeItem*>(itemList.first());
-        pReturnItem->addData(sensor, lChInfo, m_pModelEntity);
+        pReturnItem->addData(sensor, lChInfo, "MEG", m_pModelEntity);
     } else {
         pReturnItem = new SensorSetTreeItem(Data3DTreeModelItemTypes::SensorSetItem, sSensorSetName);
         addItemWithDescription(pSubjectItem, pReturnItem);
-        pReturnItem->addData(sensor, lChInfo, m_pModelEntity);
+        pReturnItem->addData(sensor, lChInfo, "MEG", m_pModelEntity);
+    }
+
+    return pReturnItem;
+}
+
+
+//*************************************************************************************************************
+
+SensorSetTreeItem* Data3DTreeModel::addEegSensorInfo(const QString& sSubject,
+                                                       const QString& sSensorSetName,
+                                                       const QList<FIFFLIB::FiffChInfo>& lChInfo)
+{
+    SensorSetTreeItem* pReturnItem = Q_NULLPTR;
+
+    //Handle subject item
+    SubjectTreeItem* pSubjectItem = addSubject(sSubject);
+
+    //Find already existing surface items and add the new data to the first search result
+    QList<QStandardItem*> itemList = pSubjectItem->findChildren(sSensorSetName);
+
+    MNEBem tempBem = MNEBem();
+
+    if(!itemList.isEmpty() && (itemList.first()->type() == Data3DTreeModelItemTypes::SensorSetItem)) {
+        pReturnItem = dynamic_cast<SensorSetTreeItem*>(itemList.first());
+        pReturnItem->addData(tempBem, lChInfo, "EEG", m_pModelEntity);
+    } else {
+        pReturnItem = new SensorSetTreeItem(Data3DTreeModelItemTypes::SensorSetItem, sSensorSetName);
+        addItemWithDescription(pSubjectItem, pReturnItem);
+        pReturnItem->addData(tempBem, lChInfo, "EEG", m_pModelEntity);
     }
 
     return pReturnItem;
@@ -482,3 +510,51 @@ void Data3DTreeModel::addItemWithDescription(QStandardItem* pItemParent, QStanda
 }
 
 
+//*************************************************************************************************************
+
+SensorDataTreeItem* Data3DTreeModel::addSensorData(const QString& sSubject,
+                                        const QString& sMeasurementSetName,
+                                        const MatrixXd& matSensorData,
+                                        const MNEBemSurface& tBemSurface,
+                                        const FiffInfo& fiffInfo,
+                                        const QString& sDataType,
+                                        const double dCancelDist,
+                                        const QString& sInterpolationFunction)
+{
+    SensorDataTreeItem* pReturnItem = Q_NULLPTR;
+
+    //Handle subject item
+    SubjectTreeItem* pSubjectItem = addSubject(sSubject);
+
+    //Find already existing surface items and add the new data to the first search result
+    QList<QStandardItem*> itemList = pSubjectItem->findChildren(sMeasurementSetName);
+
+    //Find the "set" items and add the sensor data as items
+    if(!itemList.isEmpty() && (itemList.first()->type() == Data3DTreeModelItemTypes::MeasurementItem)) {
+        if(MeasurementTreeItem* pMeasurementItem = dynamic_cast<MeasurementTreeItem*>(itemList.first())) {
+            //If measurement data has already been created but in conjunction with a different data type
+            //(i.e. connectivity, dipole fitting, etc.), do the connects here
+            if(pMeasurementItem->findChildren(Data3DTreeModelItemTypes::SensorDataItem).size() < 2) { // <2 because we can store MEG and EEG
+                if(sDataType == "EEG") {
+                    pSubjectItem->connectEEGMeasurementToBemHeadItems(pMeasurementItem);
+                } else if (sDataType == "MEG") {
+                    pSubjectItem->connectMEGMeasurementToSensorItems(pMeasurementItem, m_pRootItem);
+                }
+            }
+
+            pReturnItem = pMeasurementItem->addData(matSensorData, tBemSurface, fiffInfo, sDataType, dCancelDist, sInterpolationFunction);
+        }
+    } else {
+        MeasurementTreeItem* pMeasurementItem = new MeasurementTreeItem(Data3DTreeModelItemTypes::MeasurementItem, sMeasurementSetName);
+        addItemWithDescription(pSubjectItem, pMeasurementItem);
+        pReturnItem = pMeasurementItem->addData(matSensorData, tBemSurface, fiffInfo, sDataType, dCancelDist, sInterpolationFunction);
+
+        if(sDataType == "EEG") {
+            pSubjectItem->connectEEGMeasurementToBemHeadItems(pMeasurementItem);
+        } else if (sDataType == "MEG") {
+            pSubjectItem->connectMEGMeasurementToSensorItems(pMeasurementItem, m_pRootItem);
+        }
+    }
+
+    return pReturnItem;
+}
