@@ -70,7 +70,7 @@ SsvepBciSetupStimulusWidget::SsvepBciSetupStimulusWidget(SsvepBci *pSsvepBci, QW
     m_pSsvepBciScreen = QSharedPointer<SsvepBciScreen>(new SsvepBciScreen(m_pSsvepBci, this));
     m_pScreen  =  QSharedPointer<QScreen>(QGuiApplication::screens()[1]); // specify which screen to use
     m_pSsvepBciScreen->move(m_pScreen->geometry().x(), m_pScreen->geometry().y());
-    m_pSsvepBciScreen->showFullScreen(); // showFullScreen();
+   // m_pSsvepBciScreen->showFullScreen(); // showFullScreen();
 
     // connect signal for frequency change
     connect(this, &SsvepBciSetupStimulusWidget::frequencyChanged, m_pSsvepBci, &SsvepBci::setChangeSSVEPParameterFlag);

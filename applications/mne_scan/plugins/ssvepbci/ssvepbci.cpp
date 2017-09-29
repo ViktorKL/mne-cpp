@@ -99,7 +99,6 @@ SsvepBci::SsvepBci()
     connect(m_pActionSetupStimulus, &QAction::triggered, this, &SsvepBci::showSetupStimulus);
     addPluginAction(m_pActionSetupStimulus);
 
-
     // Intitalise BCI data
     //m_slChosenChannelsSensor << "9Z" << "8Z" << "7Z" << "6Z" << "9L" << "8L" << "9R" << "8R"; //<< "TEST";
     m_slChosenChannelsSensor << "24" << "25" << "26" << "28" << "29" << "30" << "31" << "32";
